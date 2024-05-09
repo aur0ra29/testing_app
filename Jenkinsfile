@@ -71,6 +71,25 @@ pipeline {
                 }
             }
         }
+
+        // scan if there is a previous image on docker hub
+        stage("Trivy Scan"){
+            steps {
+                script {
+                    sh ('docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image spaghettic0der/testing-app-pipeline:latest --no-progress --scanners vuln  --exit-code 0 --severity HIGH,CRITICAL --format table')
+                }
+            }
+        }
+
+        // clean the previous built docker image
+        stage("Cleanup Artifacts"){
+            steps {
+                script {
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker rmi ${IMAGE_NAME}:latest"
+                }
+            }
+        }
         
     }
 }
